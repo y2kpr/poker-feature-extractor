@@ -22,38 +22,38 @@ for i in range(1000000):
         dataDict['hole_1'] = [random.randint(1,52)]
         dataDict['hole_2'] = [random.randint(1,52)]
 
-    if 'community_1' not in dataDict:
-        dataDict['community_1'] = []
-        dataDict['community_2'] = []
-        dataDict['community_3'] = []
-        dataDict['community_4'] = []
-        dataDict['community_5'] = []
-    # tableCards = ''
-    # building the table cards
-    if round == 0:
-        dataDict['community_1'].append(0)
-        dataDict['community_2'].append(0)
-        dataDict['community_3'].append(0)
-        dataDict['community_4'].append(0)
-        dataDict['community_5'].append(0)
-    elif round == 1:
-        dataDict['community_1'].append(random.randint(1,52))
-        dataDict['community_2'].append(random.randint(1,52))
-        dataDict['community_3'].append(random.randint(1,52))
-        dataDict['community_4'].append(0)
-        dataDict['community_5'].append(0)
-    elif round == 2:
-        dataDict['community_1'].append(random.randint(1,52))
-        dataDict['community_2'].append(random.randint(1,52))
-        dataDict['community_3'].append(random.randint(1,52))
-        dataDict['community_4'].append(random.randint(1,52))
-        dataDict['community_5'].append(0)
-    elif round == 3:
-        dataDict['community_1'].append(random.randint(1,52))
-        dataDict['community_2'].append(random.randint(1,52))
-        dataDict['community_3'].append(random.randint(1,52))
-        dataDict['community_4'].append(random.randint(1,52))
-        dataDict['community_5'].append(random.randint(1,52))
+    # if 'community_1' not in dataDict:
+    #     dataDict['community_1'] = []
+    #     dataDict['community_2'] = []
+    #     dataDict['community_3'] = []
+    #     dataDict['community_4'] = []
+    #     dataDict['community_5'] = []
+    # # tableCards = ''
+    # # building the table cards
+    # if round == 0:
+    #     dataDict['community_1'].append(0)
+    #     dataDict['community_2'].append(0)
+    #     dataDict['community_3'].append(0)
+    #     dataDict['community_4'].append(0)
+    #     dataDict['community_5'].append(0)
+    # elif round == 1:
+    #     dataDict['community_1'].append(random.randint(1,52))
+    #     dataDict['community_2'].append(random.randint(1,52))
+    #     dataDict['community_3'].append(random.randint(1,52))
+    #     dataDict['community_4'].append(0)
+    #     dataDict['community_5'].append(0)
+    # elif round == 2:
+    #     dataDict['community_1'].append(random.randint(1,52))
+    #     dataDict['community_2'].append(random.randint(1,52))
+    #     dataDict['community_3'].append(random.randint(1,52))
+    #     dataDict['community_4'].append(random.randint(1,52))
+    #     dataDict['community_5'].append(0)
+    # elif round == 3:
+    #     dataDict['community_1'].append(random.randint(1,52))
+    #     dataDict['community_2'].append(random.randint(1,52))
+    #     dataDict['community_3'].append(random.randint(1,52))
+    #     dataDict['community_4'].append(random.randint(1,52))
+    #     dataDict['community_5'].append(random.randint(1,52))
 
     # print('tableCards: ' + tableCards)
     # if 'table' in dataDict:
@@ -66,4 +66,4 @@ for i in range(1000000):
 #     print("mismatch! com: ")
 df = pd.DataFrame(data=dataDict)
 print(df)
-df.to_csv('~/src/tf_playground/poker-feature-extractor/data.csv')
+df.to_csv('~/projects/poker-feature-extractor/data.csv')
