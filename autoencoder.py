@@ -9,15 +9,19 @@ import pandas as pd
 
 FEATURES = ['hole_1', 'hole_2', 'round']
 
-data = pd.read_csv('data.csv', skipinitialspace=True, skiprows=1, names=FEATURES)
+def get_train_test_data():
+    data = pd.read_csv('data.csv', skipinitialspace=True, skiprows=1, names=FEATURES)
 
-# One hot encode the card data
-data['hole_1'] = data['hole_1'].astype('category', categories=list(range(1,53)))
-data['hole_2'] = data['hole_2'].astype('category', categories=list(range(1,53)))
-data = pd.get_dummies(data, prefix=['hole_1', 'hole_2'])
+    # One hot encode the card data
+    data['hole_1'] = data['hole_1'].astype('category', categories=list(range(1,53)))
+    data['hole_2'] = data['hole_2'].astype('category', categories=list(range(1,53)))
+    data = pd.get_dummies(data, prefix=['hole_1', 'hole_2'])
 
-# NOTE: deviating from reference implementation by not setting RADOM_SEED
-train_data, test_data = train_test_split(data, test_size=0.2)
+    # NOTE: deviating from reference implementation by not setting RADOM_SEED
+    train_data, test_data = train_test_split(data, test_size=0.2)
+    return train_data, test_data
+
+train_data, test_data = get_train_test_data()
 print('num of features is ' + str(train_data.shape[1]))
 
 input_dim = train_data.shape[1]
@@ -32,7 +36,7 @@ encoder = LeakyReLU(alpha=0.01)(encoder)
 
 decoder = Dense(encoding_dim2, activation='linear')(encoder)
 decoder = LeakyReLU(alpha=0.01)(decoder)
-decoder = Dense(input_dim, activation='relu')(decoder)
+decoder = Dense(input_dim, activation='linear')(decoder)
 decoder = LeakyReLU(alpha=0.01)(decoder)
 
 # NOTE: using 'outputs' instead of 'output' in ref implementation because of updated API
@@ -41,8 +45,8 @@ autoencoder = Model(inputs=input_layer, outputs=decoder)
 nb_epoch = 100
 batch_size = 32
 
-autoencoder.compile(optimizer='adam',
-                    loss='mean_squared_error',
+autoencoder.compile(optimizer='adadelta',
+                    loss='binary_crossentropy',
                     metrics=['accuracy'])
 
 checkpointer = ModelCheckpoint(filepath="model.h5",
