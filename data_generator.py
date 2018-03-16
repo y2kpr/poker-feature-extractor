@@ -5,13 +5,13 @@ import random
 random.seed()
 dataDict = {}
 
-for i in range(1000000):
-    round = random.randint(0,3)
+for i in range(100):
+    # round = random.randint(0,3)
     # print('round is ' + str(round))
-    if 'round' in dataDict:
-        dataDict['round'].append(round)
-    else:
-        dataDict['round'] = [round]
+    # if 'round' in dataDict:
+    #     dataDict['round'].append(round)
+    # else:
+    #     dataDict['round'] = [round]
 
     # handCards = [random.randint(1,52), random.randint(1,52)]
     # handCards = str(random.randint(1,52)) + ', ' + str(random.randint(1,52))
@@ -66,4 +66,4 @@ for i in range(1000000):
 #     print("mismatch! com: ")
 df = pd.DataFrame(data=dataDict)
 print(df)
-df.to_csv('~/projects/poker-feature-extractor/data.csv')
+df.to_csv('~/projects/poker-feature-extractor/predict.csv')
