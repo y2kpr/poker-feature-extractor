@@ -3,9 +3,10 @@ import random
 
 # Gives different random numbers every minute
 random.seed()
-dataDict = {}
+dataDict = { 'hole_1': [], 'hole_2': [], 'com_1': [], 'com_2': [], 'com_3': [],
+    'com_4': [], 'com_5': []}
 
-for i in range(100):
+for i in range(1000000):
     # round = random.randint(0,3)
     # print('round is ' + str(round))
     # if 'round' in dataDict:
@@ -15,12 +16,13 @@ for i in range(100):
 
     # handCards = [random.randint(1,52), random.randint(1,52)]
     # handCards = str(random.randint(1,52)) + ', ' + str(random.randint(1,52))
-    if 'hole_1' in dataDict:
-        dataDict['hole_1'].append(random.randint(1,52))
-        dataDict['hole_2'].append(random.randint(1,52))
-    else:
-        dataDict['hole_1'] = [random.randint(1,52)]
-        dataDict['hole_2'] = [random.randint(1,52)]
+    dataDict['hole_1'].append(random.randint(1,52))
+    dataDict['hole_2'].append(random.randint(1,52))
+    dataDict['com_1'].append(random.randint(1,52))
+    dataDict['com_2'].append(random.randint(1,52))
+    dataDict['com_3'].append(random.randint(1,52))
+    dataDict['com_4'].append(random.randint(1,52))
+    dataDict['com_5'].append(random.randint(1,52))
 
     # if 'community_1' not in dataDict:
     #     dataDict['community_1'] = []
@@ -66,4 +68,5 @@ for i in range(100):
 #     print("mismatch! com: ")
 df = pd.DataFrame(data=dataDict)
 print(df)
-df.to_csv('~/projects/poker-feature-extractor/predict.csv')
+print('sending to data.csv')
+df.to_csv('~/projects/poker-feature-extractor/data.csv')
