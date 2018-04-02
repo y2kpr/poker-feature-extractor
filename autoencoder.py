@@ -35,22 +35,25 @@ train_data, test_data = get_train_test_data()
 print('num of features is ' + str(train_data.shape))
 
 input_dim = train_data.shape[1]
-# 40-20 features give 100% accuracy at epoch 11
-# 20-10 features give 100% accuracy at epoch 32
-encoding_dim1 = 90 # 65 less than the number of features we have
-encoding_dim2 = 30
+# 60-120 features give 100% accuracy
+# 45-90 features give 99.2% accuracy at epoch 4
+# (sigmoid) 30 features 100% accuracy at epoch 6
+encoding_dim1 = 120 # 65 less than the number of features we have
+encoding_dim2 = 60
+encoding_dim3 = 15
 
 input_layer = Input(shape=(input_dim,))
-encoder = Dense(encoding_dim1, activation='linear', activity_regularizer=regularizers.l1(10e-5))(input_layer)
+encoder = Dense(encoding_dim1, activation='linear')(input_layer)
 # encoder = LeakyReLU(alpha=0.01)(encoder)
 encoder = Dense(encoding_dim2, activation='linear')(encoder)
+encoder = Dense(encoding_dim3, activation='linear')(encoder)
 # encoder = LeakyReLU(alpha=0.01)(encoder)
 
-decoder = Dense(encoding_dim1, activation='linear')(encoder)
+decoder = Dense(encoding_dim2, activation='linear')(encoder)
+decoder = Dense(encoding_dim1, activation='linear')(decoder)
 # decoder = LeakyReLU(alpha=0.01)(decoder)
-decoder = Dense(input_dim, activation='relu')(decoder)
+decoder = Dense(input_dim, activation='sigmoid')(decoder)
 # decoder = LeakyReLU(alpha=0.01)(decoder)
-# decoder = sigmoid()(decoder)
 
 # NOTE: using 'outputs' instead of 'output' in ref implementation because of updated API
 autoencoder = Model(inputs=input_layer, outputs=decoder)
