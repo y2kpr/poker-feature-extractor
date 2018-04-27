@@ -37,10 +37,11 @@ print('num of features is ' + str(train_data.shape))
 input_dim = train_data.shape[1]
 # 60-120 features give 100% accuracy
 # 45-90 features give 99.2% accuracy at epoch 4
-# (sigmoid) 30 features 100% accuracy at epoch 6
+# (sigmoid) 25 features 100% accuracy at epoch 3
+# (sigmoid) 20 features 87% accuract at epoch 4 - 18
 encoding_dim1 = 120 # 65 less than the number of features we have
 encoding_dim2 = 60
-encoding_dim3 = 15
+encoding_dim3 = 25
 
 input_layer = Input(shape=(input_dim,))
 encoder = Dense(encoding_dim1, activation='linear')(input_layer)
@@ -68,7 +69,7 @@ autoencoder.compile(optimizer=adadelta,
                     loss='binary_crossentropy',
                     metrics=[metrics.binary_accuracy, card_pred])
 
-checkpointer = ModelCheckpoint(filepath="model.h5",
+checkpointer = ModelCheckpoint(filepath="card-model-{epoch:02d}.h5",
                                verbose=0,
                                save_best_only=True)
 tensorboard = TensorBoard(log_dir='./logs',
