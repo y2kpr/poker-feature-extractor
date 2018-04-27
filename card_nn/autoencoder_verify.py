@@ -33,7 +33,7 @@ def verify():
     print(prediction[80])
 
 def print_intermediate():
-    autoencoder = load_model('model.h5', custom_objects={'card_pred': card_pred})
+    autoencoder = load_model('models/card-model.h5', custom_objects={'card_pred': card_pred})
     data = get_train_test_data()
 
     input_dim = data.shape[1]
