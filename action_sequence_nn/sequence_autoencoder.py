@@ -36,6 +36,8 @@ class KerasBatchGenerator(object):
 
         sequenceOutput = np.array(sequence)
         startIndex = sequence.shape[1]
+        if startIndex > MAX_SEQUENCE:
+            print('ERROR: sequence is bigger than max')
         paddedSequences = MAX_SEQUENCE - startIndex
         for i in range(0, paddedSequences):
             sequenceOutput = np.insert(sequenceOutput, startIndex + i, np.zeros(5), axis=1)
@@ -55,7 +57,7 @@ test_data_generator = KerasBatchGenerator(test_data)
 
 # Model creation
 autoencoder = Sequential()
-# TODO: use sigmoid activation (in the final decoder output) because our inputs are 0 or 1
+# With 150 extracted features, val_accuracy gets to 88% in one epoch with 1000 sequences
 # Encoder
 autoencoder.add(LSTM(150, input_shape=(None, 5)))
 autoencoder.add(Reshape((50, 3)))

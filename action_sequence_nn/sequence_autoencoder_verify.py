@@ -50,7 +50,7 @@ class KerasBatchGenerator(object):
 data = get_train_test_data()
 print('num of features is ' + str(data.shape))
 data_generator = KerasBatchGenerator(data)
-autoencoder = load_model('models/sequence-model-01.h5')
+autoencoder = load_model('models/sequence-model.h5')
 pd.set_option('display.max_rows', 1000)
 print(data[8])
 

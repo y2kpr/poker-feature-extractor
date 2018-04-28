@@ -6,7 +6,7 @@ random.seed()
 dataDict = { 'sequences': [] }
 NUM_ACTIONS = 5
 
-for i in range(1000):
+for i in range(10000):
     # seqLength = random.randint(0,9)
     # sequence = { 'call': [], 'check': [], 'bet': [], 'raise': [], 'fold': [] }
     sequence = []
