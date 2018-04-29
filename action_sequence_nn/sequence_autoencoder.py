@@ -46,7 +46,7 @@ class KerasBatchGenerator(object):
         # print(sequenceOutput.flatten())
         self.currentIdx += 1
         while True:
-            yield sequence, sequenceOutput
+            yield sequence, sequence
 
 
 train_data, test_data = get_train_test_data()
@@ -54,18 +54,18 @@ print('num of features is ' + str(train_data.shape))
 train_data_generator = KerasBatchGenerator(train_data)
 test_data_generator = KerasBatchGenerator(test_data)
 
-encoding_dim1 = 50
+encoding_dim1 = 4
 
 # Model creation
 autoencoder = Sequential()
 # With 150 extracted features, val_accuracy gets to 88% in one epoch with 1000 sequences
 # Encoder
-autoencoder.add(LSTM(encoding_dim1, input_shape=(None, 5)))
-autoencoder.add(Reshape((1, encoding_dim1)))
+autoencoder.add(LSTM(encoding_dim1, input_shape=(None, 5), return_sequences=True))
+# autoencoder.add(Reshape((1, encoding_dim1)))
 # LSTM decoder is better than FFN
-autoencoder.add(LSTM(250, activation='sigmoid', input_shape=(1, encoding_dim1)))
+autoencoder.add(LSTM(5, activation='sigmoid', input_shape=(1, encoding_dim1), return_sequences=True))
 # autoencoder.add(Dense(250, activation="sigmoid"))
-autoencoder.add(Reshape((50, 5)))
+# autoencoder.add(Reshape((50, 5)))
 
 
 # TODO: learn how categorical_crossentropy and categorical_accuracy work
