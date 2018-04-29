@@ -3,7 +3,7 @@ import numpy as np
 import ast
 import keras.metrics as metrics
 from keras.models import Sequential
-from keras.layers import LSTM, Reshape
+from keras.layers import LSTM, Reshape, Dense
 from keras.callbacks import ModelCheckpoint
 from sklearn.model_selection import train_test_split
 
@@ -41,10 +41,9 @@ class KerasBatchGenerator(object):
         paddedSequences = MAX_SEQUENCE - startIndex
         for i in range(0, paddedSequences):
             sequenceOutput = np.insert(sequenceOutput, startIndex + i, np.zeros(5), axis=1)
-
         # print('sequence is ' + str(sequence.shape))
         # print('sequence output is ' + str(sequenceOutput.shape))
-        # print(sequence.shape)
+        # print(sequenceOutput.flatten())
         self.currentIdx += 1
         while True:
             yield sequence, sequenceOutput
@@ -60,8 +59,10 @@ autoencoder = Sequential()
 # With 150 extracted features, val_accuracy gets to 88% in one epoch with 1000 sequences
 # Encoder
 autoencoder.add(LSTM(150, input_shape=(None, 5)))
-autoencoder.add(Reshape((50, 3)))
-autoencoder.add(LSTM(5, activation='sigmoid', input_shape=(50, 3), return_sequences=True))
+autoencoder.add(Reshape((1, 150)))
+autoencoder.add(LSTM(250, activation='sigmoid', input_shape=(1, 150)))
+autoencoder.add(Reshape((50, 5)))
+# autoencoder.add(Dense(250, activation="sigmoid"))
 
 # TODO: learn how categorical_crossentropy and categorical_accuracy work
 autoencoder.compile(optimizer='adam', loss='binary_crossentropy', metrics=[metrics.binary_accuracy, metrics.categorical_accuracy])

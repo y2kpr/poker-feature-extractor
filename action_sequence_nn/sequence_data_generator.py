@@ -1,4 +1,5 @@
 import pandas as pd
+import os
 import random
 
 # Gives different random numbers every minute
@@ -76,5 +77,6 @@ for i in range(10000):
 
 df = pd.DataFrame(data=dataDict)
 print(df)
-print('sending to sequence_data.csv')
-df.to_csv('~/projects/poker-feature-extractor/action_sequence_nn/sequence_data.csv')
+dir = os.path.dirname(os.path.abspath(__file__))
+print('sending to ' + dir)
+df.to_csv(dir + '/sequence_data.csv')
