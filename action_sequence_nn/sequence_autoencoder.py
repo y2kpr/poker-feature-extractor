@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import ast
 import keras.metrics as metrics
+from keras import regularizers
 from keras.models import Sequential
 from keras.layers import LSTM, Reshape, Dense
 from keras.callbacks import ModelCheckpoint
@@ -54,16 +55,21 @@ print('num of features is ' + str(train_data.shape))
 train_data_generator = KerasBatchGenerator(train_data)
 test_data_generator = KerasBatchGenerator(test_data)
 
+input_dim = 5
 encoding_dim1 = 4
+encoding_dim2 = 3
 
 # Model creation
 autoencoder = Sequential()
 # With 150 extracted features, val_accuracy gets to 88% in one epoch with 1000 sequences
 # Encoder
-autoencoder.add(LSTM(encoding_dim1, input_shape=(None, 5), return_sequences=True))
+# autoencoder.add(LSTM(input_dim, input_shape=(None, input_dim), return_sequences=True))
+autoencoder.add(LSTM(encoding_dim1, input_shape=(None, input_dim), return_sequences=True, activity_regularizer=regularizers.l1(10e-4)))
+autoencoder.add(LSTM(encoding_dim2, input_shape=(None, encoding_dim1), return_sequences=True))
 # autoencoder.add(Reshape((1, encoding_dim1)))
 # LSTM decoder is better than FFN
-autoencoder.add(LSTM(5, activation='sigmoid', input_shape=(1, encoding_dim1), return_sequences=True))
+autoencoder.add(LSTM(encoding_dim1, input_shape=(None, encoding_dim2), return_sequences=True))
+autoencoder.add(LSTM(input_dim, activation='sigmoid', input_shape=(None, encoding_dim1), return_sequences=True))
 # autoencoder.add(Dense(250, activation="sigmoid"))
 # autoencoder.add(Reshape((50, 5)))
 
