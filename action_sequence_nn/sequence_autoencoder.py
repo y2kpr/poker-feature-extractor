@@ -98,7 +98,7 @@ autoencoder.add(LSTM(input_dim, activation='sigmoid', input_shape=(None, encodin
 # TODO: learn how categorical_crossentropy and categorical_accuracy work
 autoencoder.compile(optimizer='adam', loss='binary_crossentropy', metrics=[metrics.binary_accuracy, metrics.categorical_accuracy])
 
-checkpointer = ModelCheckpoint(filepath="models/sequence-model.h5",
+checkpointer = ModelCheckpoint(filepath="models/sequence-model-{epoch:02d}.h5",
                                verbose=0,
                                save_best_only=True)
 # tensorboard = TensorBoard(log_dir='./logs',

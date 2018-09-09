@@ -10,7 +10,7 @@ from keras.utils import to_categorical
 from sklearn.model_selection import train_test_split
 import pandas as pd
 import tensorflow as tf
-from autoencoder_helpers import card1_pred, card2_pred, card_pred
+from card_autoencoder_helpers import card1_pred, card2_pred, card_pred
 
 FEATURES = ['hole_1', 'hole_2', 'com_1', 'com_2', 'com_3', 'com_4', 'com_5']
 
@@ -69,7 +69,7 @@ autoencoder.compile(optimizer=adadelta,
                     loss='binary_crossentropy',
                     metrics=[metrics.binary_accuracy, card_pred])
 
-checkpointer = ModelCheckpoint(filepath="card-model-{epoch:02d}.h5",
+checkpointer = ModelCheckpoint(filepath="models/card-model-{epoch:02d}.h5",
                                verbose=0,
                                save_best_only=True)
 tensorboard = TensorBoard(log_dir='./logs',
