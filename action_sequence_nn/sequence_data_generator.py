@@ -8,7 +8,6 @@ def main(count):
     dataDict = { 'sequences': [] }
     NUM_ACTIONS = 5
 
-<<<<<<< HEAD
     for i in range(count):
         # seqLength = random.randint(0,9)
         # sequence = { 'call': [], 'check': [], 'bet': [], 'raise': [], 'fold': [] }
@@ -26,45 +25,11 @@ def main(count):
             # action 4 is fold
             setOne = random.randint(0, NUM_ACTIONS - 1)
             action = []
-            # if action is call. Rule 1 is to end game on 4
+            # if action is call. Rule 1 is to end game on 4th round
             # Rule 2 is to not call after check or call or as first action
             if setOne == 0:
                 if prevAction == 1 or prevAction == 0 or prevAction == -1:
                     continue
-=======
-for i in range(50000):
-    # seqLength = random.randint(0,9)
-    # sequence = { 'call': [], 'check': [], 'bet': [], 'raise': [], 'fold': [] }
-    sequence = []
-    continueSequence = True
-    numRounds = 0
-    # avoids incrementing numRounds on a check after two checks before
-    consecutiveChecks = False
-    prevAction = -1
-    while continueSequence:
-        # action 0 is call
-        # action 1 is check
-        # action 2 is bet
-        # action 3 is raise
-        # action 4 is fold
-        setOne = random.randint(0, NUM_ACTIONS - 1)
-        action = []
-        # if action is call. Rule 1 is to end game on 4
-        # Rule 2 is to not call after check or call or as first action
-        if setOne == 0:
-            if prevAction == 1 or prevAction == 0 or prevAction == -1:
-                continue
-            numRounds += 1
-            if numRounds >= 4:
-                continueSequence = False
-
-        # if action is check. Rule 1 is to not check after bets or raises
-        # Rule 2 is to increment number of rounds after two consecutive checks
-        elif setOne == 1:
-            if prevAction == 2 or prevAction == 3:
-                continue
-            if prevAction == 1 and consecutiveChecks == False:
->>>>>>> implemented feedforward decoder. Need to change accuracy and loss measurements
                 numRounds += 1
                 if numRounds >= 4:
                     continueSequence = False

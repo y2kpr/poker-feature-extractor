@@ -8,11 +8,13 @@ from keras.models import Sequential
 from keras.layers import LSTM, Reshape, Dense, Dropout
 from keras.callbacks import ModelCheckpoint, TensorBoard
 from sklearn.model_selection import train_test_split
+from tensorflow.python import debug as tf_debug
 
-NUM_EPOCHS = 10
+NUM_EPOCHS = 100
+# maximum number of actions allowed in a sequence
 MAX_SEQUENCE = 50
-BATCH_SIZE = 1
-# FEATURES = ['bet', 'call', 'check', 'fold', 'raise']
+BATCH_SIZE = 10
+INPUT_DIM = 5
 FEATURES = ['sequence']
 
 def get_train_test_data():
@@ -31,6 +33,10 @@ class KerasBatchGenerator(object):
         # back to zero
         self.currentIdx = 0
 
+    '''
+    Takes a 2D sequence of any length and pads zero-sequences so that the resulting
+    sequence is of length 'length'
+    '''
     def get_padded_sequence(self, sequence, length):
         assert (length > len(sequence))
 
@@ -59,13 +65,19 @@ class KerasBatchGenerator(object):
             # insert 0 at axis=1
             # print(oelem)
 
-    # First, just return batch size 1
+    '''
+    In a list of game sequences (given as self.data), generate a batch of sequences
+    that are padded to the maximum sequence length in that batch.
+    Checked that it works accurately
+    '''
     def generate(self):
         while True:
             # print(self.data[self.currentIdx : self.currentIdx+self.batch_size][0])
             sequences = []
             maxLength = -1
+            # what is this doing?
             if self.currentIdx + self.batch_size >= len(self.data):
+                # print('finished one epoch. Setting idx back to 0')
                 self.currentIdx = 0
             # Append all the sequences of this batch into one list
             for i in range(self.currentIdx, self.currentIdx + self.batch_size):
@@ -84,80 +96,91 @@ class KerasBatchGenerator(object):
             sequencesArr = np.array([np.array(i) for i in sequences])
             self.currentIdx += self.batch_size
 
+            # Since output is always padded to MAX_SEQUENCE, the
             sequencesOutputArr = self.get_padded_sequence(sequencesArr, MAX_SEQUENCE)
             # sequencesArr, sequencesOutputArr =
             # self.mask_sequences(sequencesArr, sequencesOutputArr)
+            # print('sequence arr shape: ' + str(sequencesArr.shape))
+            # print('sequence output arr shape: ' + str(sequencesOutputArr.shape))
 
             yield sequencesArr, sequencesOutputArr
 
 
 def sequence_loss():
     """
-    Basically just categorical cross entropy masked for where the mask==2 (output)
+    Basically just categorical cross entropy masked to exclude the padded sequences
     :return:
     """
 
     def loss(y_true, y_pred):
         # return 0 if max of y_true is 0. Ignores padded sequences
-        if K.max(y_true) == 0:
-            return 0.
+        # if K.max(y_true) == 0:
+        #     return 0.
         return K.categorical_crossentropy(y_true, y_pred)
 
     return loss
 
+# QUESTION: does y_true have one game sequence or one action in a game sequence?
 def sequence_accuracy(y_true, y_pred):
     """
     A categorical_accuracy function that ignores padded values
+    y_true shape = y_pred shape = batch_size x time steps x input dim (verified)
+
+    needs to be accurate ONLY if all actions in a game (sequence) are predicted correctly
     """
-    if K.max(y_true) == 0:
-        return 1.
-    return metrics.categorical_accuracy(y_true, y_pred)
+
+    # setting size to number of games in y_true
+    shape = K.int_shape(y_true)
+    accuracy = np.ones(BATCH_SIZE)
+    for i in range(BATCH_SIZE):
+        for j in range(MAX_SEQUENCE):
+            # TODO: figure out how to make this logic work with tensors
+            # K.switch(K.max(y_true[i][j]) >= K.variable(value=0)
+            #   and K.argmax(y_true[i][j]) != K.argmax(y_pred[i][j])
+            if K.argmax(y_true[i][j]) != K.argmax(y_pred[i][j]):
+                # if K.argmax(y_true[i][j]) != K.argmax(y_pred[i][j]):
+                accuracy[i] = 0
+                break
+
+    return K.cast(accuracy, K.floatx())
+
+# sess = K.get_session()
+# sess = tf_debug.LocalCLIDebugWrapperSession(sess)
+# K.set_session(sess)
 
 train_data, test_data = get_train_test_data()
 print('num of features is ' + str(train_data.shape))
 train_data_generator = KerasBatchGenerator(train_data, BATCH_SIZE)
 test_data_generator = KerasBatchGenerator(test_data, BATCH_SIZE)
 
-input_dim = 5
-encoding_dim1 = 1
-# encoding_dim2 = 3
 
 # Model creation
 autoencoder = Sequential()
-# With 1 extracted out of 5 features and 1 batch size, we get near 100% accuracy in 7 epochs
-# With 1 batch size, it converges quicker
 # Encoder
-# autoencoder.add(LSTM(input_dim, input_shape=(None, input_dim), return_sequences=True))
-autoencoder.add(LSTM(50, input_shape=(None, input_dim), return_sequences=False))
-# autoencoder.add(LSTM(encoding_dim2, input_shape=(None, encoding_dim1), return_sequences=True))
-# autoencoder.add(Reshape((1, encoding_dim1)))
-# LSTM decoder is better than FFN
-# autoencoder.add(LSTM(encoding_dim1, input_shape=(None, encoding_dim2), return_sequences=True))
-# autoencoder.add(LSTM(input_dim, activation='sigmoid', input_shape=(None, encoding_dim1), return_sequences=True))
-autoencoder.add(Dense(250, activation="sigmoid"))
-autoencoder.add(Reshape((50, 5)))
+autoencoder.add(LSTM(10, input_shape=(None, INPUT_DIM), return_sequences=False))
+# Decoder
+# LSTM decoder gets better accuracy than FFN but it does not consider multiple time steps at once
+autoencoder.add(Dense(MAX_SEQUENCE * INPUT_DIM, activation="sigmoid"))
+autoencoder.add(Reshape((MAX_SEQUENCE, INPUT_DIM)))
 
 
 # TODO: learn how categorical_crossentropy and categorical_accuracy work
 autoencoder.compile(optimizer='adam', loss=sequence_loss(), metrics=[metrics.binary_accuracy, metrics.categorical_accuracy, sequence_accuracy])
 
-checkpointer = ModelCheckpoint(filepath="models/sequence-model-{epoch:02d}.h5",
+checkpointer = ModelCheckpoint(filepath="models/sequence-model.h5",
                                verbose=0,
                                save_best_only=True)
 tensorboard = TensorBoard(log_dir='./logs',
                           histogram_freq=0,
                           write_graph=True,
                           write_images=True)
-# history = autoencoder.fit(train_data, train_data,
-#                     epochs=10,
-#                     validation_data=(test_data, test_data),
-#                     verbose=1,
-#                     callbacks=[checkpointer, tensorboard]).history
 
 # In the future, include batch size in steps_per_epoch
-# QUESTION: what effect does batch size really have when backprop is not done between batches?
+# QUESTION: what is the relation between batch size and the model? - I think it does not perform a
+# gradient descent within a batch. Yes, seems like it. The gradient descent is done on vectors of shape
+# (batch_size, INPUT_DIM)
 # NOTE: for some reason the steps_per_epoch need to be 10 less than train_data//BATCH_SIZE. WHY?
-history = autoencoder.fit_generator(train_data_generator.generate(), steps_per_epoch=(len(train_data)//BATCH_SIZE) - 10,
+history = autoencoder.fit_generator(train_data_generator.generate(), steps_per_epoch=(len(train_data)//BATCH_SIZE),
                         epochs=NUM_EPOCHS, validation_data=test_data_generator.generate(),
-                        validation_steps=(len(test_data)//BATCH_SIZE) - 10, verbose=1,
+                        validation_steps=(len(test_data)//BATCH_SIZE), verbose=1,
                         callbacks=[checkpointer, tensorboard]).history

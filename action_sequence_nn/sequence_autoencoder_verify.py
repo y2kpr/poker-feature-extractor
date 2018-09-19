@@ -55,7 +55,7 @@ data = pd.read_csv('sequence_data.csv', skipinitialspace=True, skiprows=1,
             names=FEATURES, nrows=10).as_matrix()
 print('num of features is ' + str(data.shape))
 data_generator = KerasBatchGenerator(data, BATCH_SIZE)
-autoencoder = load_model('models/sequence-model.h5')
+autoencoder = load_model('models/sequence-model-10.h5')
 pd.set_option('display.max_rows', 1000)
 print(data[8])
 
