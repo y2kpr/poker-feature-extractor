@@ -5,59 +5,91 @@ import keras.metrics as metrics
 from keras.models import Sequential, load_model
 from keras.layers import LSTM, Reshape
 from keras.callbacks import ModelCheckpoint
+from sklearn.metrics import confusion_matrix
 
-NUM_EPOCHS = 10
-MAX_SEQUENCE = 50
 BATCH_SIZE = 1
-# FEATURES = ['bet', 'call', 'check', 'fold', 'raise']
+NUM_PREDICTIONS = 10000
 FEATURES = ['sequence']
 
 class KerasBatchGenerator(object):
 
     def __init__(self, data, batch_size):
-        self.data = data
+        self.data = self.to_list(data)
         self.batch_size = batch_size
         # this will track the progress of the batches sequentially through the
         # data set - once the data reaches the end of the data set it will reset
         # back to zero
         self.currentIdx = 0
 
+    def to_list(self, data):
+        for i in range(len(data)):
+            data[i] = [ast.literal_eval(data[i][0])]
+        return data
+
+    def get_data(self):
+        return self.data
+
     # First, just return batch size 1
     def generate(self):
         while True:
             # print(self.data[self.currentIdx : self.currentIdx+self.batch_size][0])
-            sequences = []
-            maxLength = -1
-            if self.currentIdx + self.batch_size >= len(self.data):
+            if self.currentIdx >= len(self.data):
                 self.currentIdx = 0
-            # Append all the sequences of this batch into one list
-            for i in range(self.currentIdx, self.currentIdx + self.batch_size):
-                sequence = ast.literal_eval(self.data[i][0])
-                if len(sequence) > maxLength:
-                    maxLength = len(sequence)
-                # print(sequence)
-                sequences.append(sequence)
-            # print('before addition: ' + str(sequences))
-            # Now pad everything which is not the longest sequence
-            for seq in sequences:
-                # print('len: ' + str(len(seq)) + ' max len: ' + str(maxLength))
-                # print(seq)
-                for i in range(len(seq), maxLength):
-                    seq.append([0, 0, 0, 0, 0])
-            sequencesArr = np.array([np.array(i) for i in sequences])
-            self.currentIdx += self.batch_size
-            print(sequencesArr.shape)
-            print(maxLength)
-            yield sequencesArr, sequencesArr
 
+            # sequence = ast.literal_eval(self.data[self.currentIdx][0])
+            # sequences = [sequence]
+            sequenceArr = np.array([sequence for sequence in self.data[self.currentIdx]])
+            self.currentIdx += 1
 
-data = pd.read_csv('sequence_data.csv', skipinitialspace=True, skiprows=1,
-            names=FEATURES, nrows=10).as_matrix()
+            yield sequenceArr, sequenceArr
+
+def custom_predict_generator(model, generator, steps):
+    stepsDone = 0
+    allOuts = []
+
+    while stepsDone < steps:
+        # assuming a tuple with (inputs, targets). Ingore the labels
+        data, _ = next(generator)
+        outs = model.predict_on_batch(data)
+        stepsDone += 1
+        allOuts.append(outs[0])
+    # allOuts = np.array(allOuts)
+
+    return allOuts
+
+def action_confusion_matrix(trueSeqs, predSeqs):
+    # flatten lists to lose sequence information because we only care about individual actions
+    trueActions = [action for sequence in trueSeqs for action in sequence[0]]
+    trueActions = [np.argmax(action) for action in trueActions]
+    predActions = [action for sequence in predSeqs for action in sequence]
+    predActions = [np.argmax(action) for action in predActions]
+
+    actionCM = confusion_matrix(trueActions, predActions)
+
+    # print some stats
+    print("num of total actions: " + str(len(trueActions)))
+    numErrors = 0
+    for i in range(len(actionCM)):
+        for j in range(len(actionCM)):
+            if i == j:
+                continue
+            numErrors += actionCM[i][j]
+    print("num of wrongly predicted action: " + str(numErrors))
+    accuracy = 1-(numErrors/len(trueActions))
+    print("accuracy: " + str(accuracy*100) + "%")
+
+    return actionCM
+
+data = pd.read_csv('sequence_data_verify.csv', skipinitialspace=True, skiprows=1,
+            names=FEATURES, nrows=NUM_PREDICTIONS).as_matrix()
 print('num of features is ' + str(data.shape))
-data_generator = KerasBatchGenerator(data, BATCH_SIZE)
-autoencoder = load_model('models/sequence-model.h5')
+dataGenerator = KerasBatchGenerator(data, BATCH_SIZE)
+autoencoder = load_model('models/sequence-model-24.h5')
 pd.set_option('display.max_rows', 1000)
-print(data[8])
+cleanData = dataGenerator.get_data()
 
-prediction = autoencoder.predict_generator(data_generator.generate(), steps=len(data)//BATCH_SIZE)
-print(prediction[8])
+predictions = custom_predict_generator(autoencoder, dataGenerator.generate(), steps=NUM_PREDICTIONS)
+actionCM = action_confusion_matrix(cleanData, predictions)
+print(actionCM)
+
+# print(predictions[0])

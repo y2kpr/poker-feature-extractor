@@ -1,0 +1,9 @@
+bet: hole cards: nine|hearts, six|spades community cards:
+call: hole cards: nine|hearts, six|spades community cards: five|hearts, eight|diamonds, queen|hearts,
+bet: hole cards: nine|hearts, six|spades community cards: five|hearts, eight|diamonds, queen|hearts,
+raise: hole cards: nine|hearts, six|spades community cards: five|hearts, eight|diamonds, queen|hearts,
+raise: hole cards: nine|hearts, six|spades community cards: five|hearts, eight|diamonds, queen|hearts,
+raise: hole cards: nine|hearts, six|spades community cards: five|hearts, eight|diamonds, queen|hearts,
+call: hole cards: nine|hearts, six|spades community cards: five|hearts, eight|diamonds, queen|hearts, seven|hearts,
+bet: hole cards: nine|hearts, six|spades community cards: five|hearts, eight|diamonds, queen|hearts, seven|hearts,
+raise: hole cards: nine|hearts, six|spades community cards: five|hearts, eight|diamonds, queen|hearts, seven|hearts,

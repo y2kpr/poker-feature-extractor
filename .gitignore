@@ -1,3 +1,6 @@
 logs/
 __pycache__
-**/*data.csv
+**/*data*.csv
+card-model-*
+sequence-model-*
+.DS_Store

@@ -2,13 +2,13 @@ from keras.models import Model, load_model
 from keras.layers import Input, Dense
 from sklearn.model_selection import train_test_split
 import pandas as pd
-from autoencoder_helpers import card_pred, card1_pred, card2_pred
+from card_autoencoder_helpers import card_pred, card1_pred, card2_pred
 # from autoencoder import get_train_test_data
 
 FEATURES = ['hole_1', 'hole_2', 'com_1', 'com_2', 'com_3', 'com_4', 'com_5']
 
 def get_train_test_data():
-    data = pd.read_csv('predict.csv', skipinitialspace=True, skiprows=1, names=FEATURES, nrows=100)
+    data = pd.read_csv('card_predict.csv', skipinitialspace=True, skiprows=1, names=FEATURES, nrows=1000)
 
     # One hot encode the card data
     data['hole_1'] = data['hole_1'].astype(pd.api.types.CategoricalDtype(categories=list(range(1,53))))
@@ -18,19 +18,22 @@ def get_train_test_data():
     data['com_3'] = data['com_3'].astype(pd.api.types.CategoricalDtype(categories=list(range(1,53))))
     data['com_4'] = data['com_4'].astype(pd.api.types.CategoricalDtype(categories=list(range(1,53))))
     data['com_5'] = data['com_5'].astype(pd.api.types.CategoricalDtype(categories=list(range(1,53))))
-    data = pd.get_dummies(data, prefix=['hole_1', 'hole_2', 'com_1', 'com_2', 'com_3', 'com_4', 'com_5'])
+    # data['round'] = data['round'].astype(pd.api.types.CategoricalDtype(categories=list(range(0,4))))
+
+    data = pd.get_dummies(data, prefix=['com_1', 'com_2', 'com_3', 'com_4', 'com_5', 'hole_1', 'hole_2'])
 
     return data
 
 def verify():
-    autoencoder = load_model('model.h5', custom_objects={'card_pred': card_pred, 'card1_pred': card1_pred,
+    autoencoder = load_model('models/100%_no_zeroes.h5', custom_objects={'card_pred': card_pred, 'card1_pred': card1_pred,
         'card2_pred': card2_pred})
     data = get_train_test_data()
     pd.set_option('display.max_rows', 1000)
-    print(data.iloc[80])
-
-    prediction = autoencoder.predict(data)
-    print(prediction[80])
+    # print(data.iloc[80])
+    out = autoencoder.evaluate(data, data)
+    print('metric names are: ' + str(autoencoder.metrics_names))
+    print(out)
+    # print(predictions[80])
 
 def print_intermediate():
     autoencoder = load_model('models/card-model.h5', custom_objects={'card_pred': card_pred})
