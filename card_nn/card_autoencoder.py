@@ -49,15 +49,15 @@ input_dim = train_data.shape[1]
 # 45-90 features give 99.2% accuracy at epoch 4
 # (sigmoid) 25 features 100% accuracy at epoch 3
 # (sigmoid) 20 features 100% accuract at epoch 89
-encoding_dim1 = 120 # 65 less than the number of features we have
-encoding_dim2 = 60
+encoding_dim1 = 100 # 65 less than the number of features we have
+encoding_dim2 = 50
 encoding_dim3 = 20
 
 input_layer = Input(shape=(input_dim,))
 encoder = Dense(encoding_dim1, activation='linear')(input_layer)
 # encoder = LeakyReLU(alpha=0.01)(encoder)
 encoder = Dense(encoding_dim2, activation='linear')(encoder)
-encoder = Dense(encoding_dim3, activation='linear')(encoder)
+encoder = Dense(encoding_dim3, activation='linear')(encoder) # Apply sigmoid activation here too or else it is just a linear regression algo
 # encoder = LeakyReLU(alpha=0.01)(encoder)
 
 decoder = Dense(encoding_dim2, activation='linear')(encoder)
